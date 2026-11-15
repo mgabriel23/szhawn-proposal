@@ -11,16 +11,13 @@
 	};
 
 	var letterBody = document.getElementById("letterBody");
-	var paras = Array.prototype.slice.call(
-		letterBody.querySelectorAll("p[data-type]"),
-	);
+	var paras = letterBody ? Array.prototype.slice.call(letterBody.querySelectorAll("p[data-type]")) : [];
+
 	var continueBtn = document.getElementById("toScene3");
 	var progressBar = document.getElementById("progressBar");
 	var scene2 = scenes[2];
 
-	var reduceMotion = window.matchMedia(
-		"(prefers-reduced-motion: reduce)",
-	).matches;
+	var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 	var totalChars = paras.reduce(function (sum, p) {
 		return sum + p.getAttribute("data-type").length;
@@ -82,6 +79,7 @@
 	 Scene routing
 	 --------------------------------------------------------- */
 	function focusContent(scene) {
+		if (!scene) return;
 		var el = scene.querySelector(".scene__content");
 		if (el) {
 			try {
@@ -103,7 +101,6 @@
 		if (activeScene === 2 && n !== 2) {
 			pauseAudio();
 
-			// Pause the typewriter without resetting it
 			if (typing) {
 				window.clearTimeout(typeTimer);
 				typing = false;
@@ -114,33 +111,32 @@
 
 		// --- ENTERING SCENE 2 ---
 		if (n === 2) {
-			audioToggleBtn.classList.add('is-visible');
+			if (audioToggleBtn) audioToggleBtn.classList.add('is-visible');
 			playAudio();
 
 			if (!letterStarted) {
 				startLetter();
 			} else if (!letterCompleted) {
-				// Resume typing from where it paused
 				typing = true;
 				var p = paras[pIndex];
 				if (p) p.classList.add("is-typing");
 				typeTimer = window.setTimeout(typeStep, 500);
 			}
 		} else {
-			audioToggleBtn.classList.remove('is-visible');
+			if (audioToggleBtn) audioToggleBtn.classList.remove('is-visible');
 		}
 
-		// Hide Scroll Indicator when leaving scene 2
-		if (n !== 2) {
-			scrollIndicator.classList.add('is-hidden');
+		if (n !== 2 && scrollIndicator) {
+			scrollIndicator.classList.add("is-hidden");
 		}
 
 		// Update classes & slide
-		prev.classList.remove('is-active');
-		next.classList.add('is-active');
-		stageTrack.style.transform = 'translateX(-' + ((n - 1) * 100) + '%)';
+		if (prev) prev.classList.remove('is-active');
+		if (next) next.classList.add('is-active');
 
-		// REMOVED next.scrollTop = 0; so it remembers where you were reading.
+		if (stageTrack) {
+			stageTrack.style.transform = 'translateX(-' + ((n - 1) * 100) + '%)';
+		}
 
 		// Update Dots
 		dots.forEach(function (dot) {
@@ -150,7 +146,7 @@
 			}
 		});
 
-		swipeHint.classList.add('is-hidden');
+		if (swipeHint) swipeHint.classList.add('is-hidden');
 		window.clearTimeout(hintTimeout);
 		activeScene = n;
 
@@ -163,9 +159,11 @@
 		}, 850);
 	}
 
-	continueBtn.addEventListener("click", function () {
-		goTo(3);
-	});
+	if (continueBtn) {
+		continueBtn.addEventListener("click", function () {
+			goTo(3);
+		});
+	}
 
 	/* ---------------------------------------------------------
 	 Typewriter state
@@ -179,11 +177,11 @@
 	var typedChars = 0;
 
 	function setProgress(ratio) {
-		progressBar.style.transform =
-			"scaleX(" + Math.max(0, Math.min(1, ratio)).toFixed(4) + ")";
+		if (progressBar) {
+			progressBar.style.transform = "scaleX(" + Math.max(0, Math.min(1, ratio)).toFixed(4) + ")";
+		}
 	}
 
-	// Simple play/pause to prevent cut-off sounds
 	function playAudio() {
 		if (!audio) return;
 		audio.volume = 0.5;
@@ -198,6 +196,7 @@
 	}
 
 	function updateScrollIndicator() {
+		if (!scrollIndicator || !scene2) return;
 		if (activeScene !== 2) {
 			scrollIndicator.classList.add('is-hidden');
 			return;
@@ -225,10 +224,10 @@
 			paras[i].classList.remove("is-typing");
 		}
 
-		continueBtn.classList.add("is-hidden");
+		if (continueBtn) continueBtn.classList.add("is-hidden");
 		setProgress(0);
 
-		scene2.scrollTop = 0;
+		if (scene2) scene2.scrollTop = 0;
 	}
 
 	function completeLetter() {
@@ -244,7 +243,7 @@
 		pIndex = paras.length;
 		typedChars = totalChars;
 		setProgress(1);
-		continueBtn.classList.remove("is-hidden");
+		if (continueBtn) continueBtn.classList.remove("is-hidden");
 	}
 
 	function typeStep() {
@@ -266,7 +265,6 @@
 			updateScrollIndicator();
 
 			var ch = text.charAt(cIndex - 1);
-
 			var delay = 25 + Math.random() * 20;
 
 			if (ch === "." || ch === "!" || ch === "?") {
@@ -303,12 +301,11 @@
 		}
 
 		typing = true;
-		paras[0].classList.add("is-typing");
+		if (paras[0]) paras[0].classList.add("is-typing");
 		typeTimer = window.setTimeout(typeStep, 700);
 	}
 
-	// Mute / Unmute Toggle
-	if (audioToggleBtn) {
+	if (audioToggleBtn && audio && iconUnmuted && iconMuted) {
 		audioToggleBtn.addEventListener("click", function () {
 			if (audio.muted) {
 				audio.muted = false;
@@ -330,38 +327,45 @@
 		}
 	});
 
-	scrollIndicator.addEventListener("click", function () {
-		scene2.scrollBy({
-			top: scene2.clientHeight * 0.6,
-			behavior: "smooth",
+	if (scrollIndicator && scene2) {
+		scrollIndicator.addEventListener("click", function () {
+			scene2.scrollBy({
+				top: scene2.clientHeight * 0.6,
+				behavior: "smooth",
+			});
 		});
-	});
+	}
 
-	scene2.addEventListener("scroll", updateScrollIndicator, { passive: true });
+	if (scene2) {
+		scene2.addEventListener("scroll", updateScrollIndicator, { passive: true });
+	}
 
 	/* ---------------------------------------------------------
 	 Manual Carousel Controls (Swipe & Keyboard)
 	 --------------------------------------------------------- */
-	document.querySelector('.stage').addEventListener('touchstart', function (e) {
-		touchStartX = e.changedTouches[0].screenX;
-		touchStartY = e.changedTouches[0].screenY;
-	}, { passive: true });
+	var stageEl = document.querySelector('.stage');
+	if (stageEl) {
+		stageEl.addEventListener('touchstart', function (e) {
+			touchStartX = e.changedTouches[0].screenX;
+			touchStartY = e.changedTouches[0].screenY;
+		}, { passive: true });
 
-	document.querySelector('.stage').addEventListener('touchend', function (e) {
-		var touchEndX = e.changedTouches[0].screenX;
-		var touchEndY = e.changedTouches[0].screenY;
+		stageEl.addEventListener('touchend', function (e) {
+			var touchEndX = e.changedTouches[0].screenX;
+			var touchEndY = e.changedTouches[0].screenY;
 
-		var diffX = touchEndX - touchStartX;
-		var diffY = touchEndY - touchStartY;
+			var diffX = touchEndX - touchStartX;
+			var diffY = touchEndY - touchStartY;
 
-		if (Math.abs(diffX) < Math.abs(diffY) || Math.abs(diffX) < 60) return;
+			if (Math.abs(diffX) < Math.abs(diffY) || Math.abs(diffX) < 60) return;
 
-		if (diffX < -60 && activeScene < 3) {
-			goTo(activeScene + 1);
-		} else if (diffX > 60 && activeScene > 1) {
-			goTo(activeScene - 1);
-		}
-	}, { passive: true });
+			if (diffX < -60 && activeScene < 3) {
+				goTo(activeScene + 1);
+			} else if (diffX > 60 && activeScene > 1) {
+				goTo(activeScene - 1);
+			}
+		}, { passive: true });
+	}
 
 	document.addEventListener('keydown', function (e) {
 		if (e.key === 'ArrowRight' && activeScene < 3) {
@@ -382,6 +386,6 @@
 	});
 
 	hintTimeout = setTimeout(function () {
-		swipeHint.classList.add('is-hidden');
+		if (swipeHint) swipeHint.classList.add('is-hidden');
 	}, 6000);
 })();
