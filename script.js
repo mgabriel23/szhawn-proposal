@@ -15,7 +15,6 @@
 		letterBody.querySelectorAll("p[data-type]"),
 	);
 	var continueBtn = document.getElementById("toScene3");
-	var openBtn = document.getElementById("toScene2");
 	var progressBar = document.getElementById("progressBar");
 	var scene2 = scenes[2];
 
@@ -36,7 +35,6 @@
 	var audioToggleBtn = document.getElementById("audioToggle");
 	var iconUnmuted = document.getElementById("iconUnmuted");
 	var iconMuted = document.getElementById("iconMuted");
-	var audioFadeInterval = null;
 
 	var stageTrack = document.getElementById('stageTrack');
 	var touchStartX = 0;
@@ -48,9 +46,6 @@
 
 	/* ---------------------------------------------------------
 	 Layout stability
-	 Every paragraph permanently reserves the height of its FULL
-	 text from the very first frame, so the page never reflows
-	 or jumps while characters are being typed in.
 	 --------------------------------------------------------- */
 	function reserveHeights() {
 		for (var i = 0; i < paras.length; i++) {
@@ -84,7 +79,7 @@
 	);
 
 	/* ---------------------------------------------------------
-	 Scene routing — outgoing lifts, incoming rises (crossfade)
+	 Scene routing
 	 --------------------------------------------------------- */
 	function focusContent(scene) {
 		var el = scene.querySelector(".scene__content");
@@ -106,7 +101,7 @@
 
 		// --- LEAVING SCENE 2 ---
 		if (activeScene === 2 && n !== 2) {
-			pauseAudio(); // Replaced pauseAudioFadeOut()
+			pauseAudio();
 
 			// Pause the typewriter without resetting it
 			if (typing) {
@@ -120,7 +115,7 @@
 		// --- ENTERING SCENE 2 ---
 		if (n === 2) {
 			audioToggleBtn.classList.add('is-visible');
-			playAudio(); // Replaced playAudioFadeIn()
+			playAudio();
 
 			if (!letterStarted) {
 				startLetter();
@@ -144,7 +139,8 @@
 		prev.classList.remove('is-active');
 		next.classList.add('is-active');
 		stageTrack.style.transform = 'translateX(-' + ((n - 1) * 100) + '%)';
-		next.scrollTop = 0;
+
+		// REMOVED next.scrollTop = 0; so it remembers where you were reading.
 
 		// Update Dots
 		dots.forEach(function (dot) {
@@ -176,8 +172,8 @@
 	 --------------------------------------------------------- */
 	var typeTimer = null;
 	var typing = false;
-	var letterStarted = false;   // ADD THIS
-	var letterCompleted = false; // ADD THIS
+	var letterStarted = false;
+	var letterCompleted = false;
 	var pIndex = 0;
 	var cIndex = 0;
 	var typedChars = 0;
@@ -187,10 +183,10 @@
 			"scaleX(" + Math.max(0, Math.min(1, ratio)).toFixed(4) + ")";
 	}
 
-	// Simple play/pause without fading to prevent cut-off sounds
+	// Simple play/pause to prevent cut-off sounds
 	function playAudio() {
 		if (!audio) return;
-		audio.volume = 0.5; // Set comfortable background volume
+		audio.volume = 0.5;
 		audio.play().catch(function (e) {
 			console.log("Audio autoplay blocked:", e);
 		});
@@ -202,7 +198,6 @@
 	}
 
 	function updateScrollIndicator() {
-		// Force hide if we are not on Scene 2
 		if (activeScene !== 2) {
 			scrollIndicator.classList.add('is-hidden');
 			return;
@@ -236,13 +231,10 @@
 		scene2.scrollTop = 0;
 	}
 
-	/* The letter always finishes typing at its own pace. No scroll,
-	 no scrollIntoView — the reader stays exactly where they are.
-	 The Continue button simply fades in inside its reserved slot. */
 	function completeLetter() {
 		window.clearTimeout(typeTimer);
 		typing = false;
-		letterCompleted = true; // Mark as complete so it never restarts
+		letterCompleted = true;
 
 		for (var i = 0; i < paras.length; i++) {
 			paras[i].textContent = paras[i].getAttribute("data-type");
@@ -255,10 +247,6 @@
 		continueBtn.classList.remove("is-hidden");
 	}
 
-	/* ---------------------------------------------------------
-	 Typing loop — no auto-scroll, no interruptions.
-	 The letter always types through to the very end.
-	 --------------------------------------------------------- */
 	function typeStep() {
 		if (!typing) return;
 
@@ -279,21 +267,18 @@
 
 			var ch = text.charAt(cIndex - 1);
 
-			// EMOTIONAL PACING
-			// Base speed is slower (25-45ms)
 			var delay = 25 + Math.random() * 20;
 
 			if (ch === "." || ch === "!" || ch === "?") {
-				delay += 450; // Long, dramatic pause at the end of a sentence
+				delay += 450;
 			} else if (ch === "," || ch === ";" || ch === ":") {
-				delay += 250; // Softer pause at commas
+				delay += 250;
 			}
 
 			typeTimer = window.setTimeout(typeStep, delay);
 			return;
 		}
 
-		// Paragraph complete
 		p.classList.remove("is-typing");
 		pIndex++;
 		cIndex = 0;
@@ -304,7 +289,6 @@
 		}
 
 		paras[pIndex].classList.add("is-typing");
-		// Longer pause between paragraphs (700ms) for emotional weight
 		typeTimer = window.setTimeout(typeStep, 700);
 	}
 
@@ -338,9 +322,6 @@
 		});
 	}
 
-	/* ---------------------------------------------------------
-	 Pause typing while the tab is hidden, resume when back
-	 --------------------------------------------------------- */
 	document.addEventListener("visibilitychange", function () {
 		if (document.hidden) {
 			if (typing) window.clearTimeout(typeTimer);
@@ -349,7 +330,6 @@
 		}
 	});
 
-	// Make the button scroll down when clicked
 	scrollIndicator.addEventListener("click", function () {
 		scene2.scrollBy({
 			top: scene2.clientHeight * 0.6,
@@ -357,14 +337,11 @@
 		});
 	});
 
-	// Listen for manual scrolling to hide/show the indicator
 	scene2.addEventListener("scroll", updateScrollIndicator, { passive: true });
 
 	/* ---------------------------------------------------------
-   Manual Carousel Controls (Swipe & Keyboard)
-   --------------------------------------------------------- */
-
-	// Touch Swipe Support
+	 Manual Carousel Controls (Swipe & Keyboard)
+	 --------------------------------------------------------- */
 	document.querySelector('.stage').addEventListener('touchstart', function (e) {
 		touchStartX = e.changedTouches[0].screenX;
 		touchStartY = e.changedTouches[0].screenY;
@@ -377,19 +354,15 @@
 		var diffX = touchEndX - touchStartX;
 		var diffY = touchEndY - touchStartY;
 
-		// Ignore if vertical scroll was dominant (user is reading/typing)
 		if (Math.abs(diffX) < Math.abs(diffY) || Math.abs(diffX) < 60) return;
 
 		if (diffX < -60 && activeScene < 3) {
-			// Swipe Left -> Next Scene
 			goTo(activeScene + 1);
 		} else if (diffX > 60 && activeScene > 1) {
-			// Swipe Right -> Previous Scene
 			goTo(activeScene - 1);
 		}
 	}, { passive: true });
 
-	// Keyboard Arrow Support (Desktop)
 	document.addEventListener('keydown', function (e) {
 		if (e.key === 'ArrowRight' && activeScene < 3) {
 			goTo(activeScene + 1);
@@ -399,10 +372,8 @@
 	});
 
 	/* ---------------------------------------------------------
-   Dot Navigation & Swipe Hint
-   --------------------------------------------------------- */
-
-	// Click a dot to navigate
+	 Dot Navigation & Swipe Hint
+	 --------------------------------------------------------- */
 	dots.forEach(function (dot) {
 		dot.addEventListener('click', function () {
 			var target = parseInt(this.getAttribute('data-scene'));
@@ -410,7 +381,6 @@
 		});
 	});
 
-	// Automatically fade out the swipe hint after 6 seconds if they haven't interacted yet
 	hintTimeout = setTimeout(function () {
 		swipeHint.classList.add('is-hidden');
 	}, 6000);
