@@ -74,272 +74,287 @@
 		</div>
 
 		<main class="stage" id="stage">
-			<!-- ========================= SCENE 1 ========================= -->
-			<section
-				class="scene is-active"
-				id="scene1"
-				aria-labelledby="s1-title"
-			>
-				<div class="scene__inner">
-					<div class="scene__content" tabindex="-1">
-						<span class="eyebrow reveal" style="--d: 0.05s"
-							>A Gentle Invitation</span
-						>
-
-						<h1
-							class="title reveal"
-							id="s1-title"
-							style="--d: 0.2s"
-						>
-							A little request from a little boy whose big day is
-							just around the corner
-						</h1>
-
-						<div
-							class="divider reveal"
-							style="--d: 0.35s"
-							aria-hidden="true"
-						>
-							<i></i>
-						</div>
-
-						<!-- Baby Szhawn resting on the button -->
-						<div class="sitter reveal" style="--d: 0.42s">
-							<img
-								src="baby-szhawn.png"
-								alt="Baby Szhawn resting his chin on his hand"
-								class="sitter__img"
-								decoding="async"
-								fetchpriority="high"
-							/>
-						</div>
-
-						<button
-							class="btn btn--block reveal"
-							id="toScene2"
-							type="button"
-							style="--d: 0.5s"
-						>
-							Open Invitation
-						</button>
-					</div>
-				</div>
-			</section>
-
-			<!-- ========================= SCENE 2 ========================= -->
-			<section class="scene" id="scene2" aria-labelledby="s2-title">
-				<!-- Background Audio (Update src to your actual file name) -->
-				<audio
-					id="scene2Audio"
-					src="scene2-voice.mp3"
-					preload="auto"
-				></audio>
-
-				<!-- Mute/Unmute Toggle -->
-				<button
-					id="audioToggle"
-					class="audio-toggle"
-					type="button"
-					aria-label="Toggle background music"
+			<div class="stage-track" id="stageTrack">
+				<!-- ========================= SCENE 1 ========================= -->
+				<section
+					class="scene is-active"
+					id="scene1"
+					aria-labelledby="s1-title"
 				>
-					<svg
-						id="iconUnmuted"
-						width="20"
-						height="20"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<polygon
-							points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"
-						></polygon>
-						<path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-						<path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-					</svg>
-					<svg
-						id="iconMuted"
-						class="is-hidden"
-						width="20"
-						height="20"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<polygon
-							points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"
-						></polygon>
-						<line x1="23" y1="9" x2="17" y2="15"></line>
-						<line x1="17" y1="9" x2="23" y2="15"></line>
-					</svg>
-				</button>
-
-				<div class="scene__inner">
-					<div
-						class="scene__content scene__content--letter"
-						tabindex="-1"
-					>
-						<div class="letter-head">
-							<span class="eyebrow" id="s2-title"
-								>The Invitation</span
+					<div class="scene__inner">
+						<div class="scene__content" tabindex="-1">
+							<h1
+								class="title reveal"
+								id="s1-title"
+								style="--d: 0.2s"
 							>
-							<div class="progress" aria-hidden="true">
-								<span
-									class="progress__bar"
-									id="progressBar"
-								></span>
+								A little request from a little boy, hoping
+								you'll be part of his big day.
+							</h1>
+
+							<div
+								class="divider reveal"
+								style="--d: 0.35s"
+								aria-hidden="true"
+							>
+								<i></i>
+							</div>
+
+							<!-- Baby Szhawn resting on the button -->
+							<div class="sitter reveal" style="--d: 0.42s">
+								<img
+									src="baby-szhawn.png"
+									alt="Baby Szhawn resting his chin on his hand"
+									class="sitter__img"
+									decoding="async"
+									fetchpriority="high"
+								/>
 							</div>
 						</div>
+					</div>
+				</section>
 
-						<!-- Visual, character-by-character text -->
-						<div class="letter" id="letterBody" aria-hidden="true">
-							<p data-type="Dear Tito/Tita,"></p>
-							<p data-type="Hi po! I'm Baby Szhawn!"></p>
-							<p
-								data-type="My special day is coming soon, and Mommy and Daddy would be very happy if you could be part of my journey as I grow in faith and love."
-							></p>
-							<p
-								data-type="It would mean so much to me if you would say YES and become my Ninong/Ninang. I hope you'll guide me, pray for me, and be part of the many beautiful memories I'll make as I grow up."
-							></p>
-							<p
-								data-type="Sorry po if this invitation comes a little late, but I truly hope you'll say YES!"
-							></p>
-							<p
-								class="letter__ask"
-								data-type="Will you be my Ninong/Ninang?"
-							></p>
-							<p
-								class="letter__sign"
-								data-type="Love, Baby Szhawn"
-							></p>
-						</div>
+				<!-- ========================= SCENE 2 ========================= -->
+				<section class="scene" id="scene2" aria-labelledby="s2-title">
+					<div class="scene__inner">
+						<div
+							class="scene__content scene__content--letter"
+							tabindex="-1"
+						>
+							<div class="letter-head">
+								<div class="progress" aria-hidden="true">
+									<span
+										class="progress__bar"
+										id="progressBar"
+									></span>
+								</div>
+							</div>
 
-						<!-- Screen-reader version (full text, no typing) -->
-						<div class="sr-only">
-							<p>Dear Tito/Tita,</p>
-							<p>Hi po! I'm Baby Szhawn!</p>
-							<p>
-								My special day is coming soon, and Mommy and
-								Daddy would be very happy if you could be part
-								of my journey as I grow in faith and love.
-							</p>
-							<p>
-								It would mean so much to me if you would say YES
-								and become my Ninong/Ninang. I hope you'll guide
-								me, pray for me, and be part of the many
-								beautiful memories I'll make as I grow up.
-							</p>
-							<p>
-								Sorry po if this invitation comes a little late,
-								but I truly hope you'll say YES!
-							</p>
-							<p>Will you be my Ninong/Ninang?</p>
-							<p>Love, Baby Szhawn</p>
-						</div>
-
-						<div class="actions">
-							<button
-								class="btn btn--premium is-hidden"
-								id="toScene3"
-								type="button"
+							<!-- Visual, character-by-character text -->
+							<div
+								class="letter"
+								id="letterBody"
+								aria-hidden="true"
 							>
-								<span class="btn__text">Continue</span>
-								<span class="btn__icon" aria-hidden="true"
-									>→</span
+								<p data-type="Dear Tito/Tita,"></p>
+								<p data-type="Hi po! I'm Baby Szhawn!"></p>
+								<p
+									data-type="My special day is coming soon, and Mommy and Daddy would be very happy if you could be part of my journey as I grow in faith and love."
+								></p>
+								<p
+									data-type="It would mean so much to me if you would say YES and become my Ninong/Ninang. I hope you'll guide me, pray for me, and be part of the many beautiful memories I'll make as I grow up."
+								></p>
+								<p
+									data-type="Sorry po if this invitation comes a little late, but I truly hope you'll say YES!"
+								></p>
+								<p
+									class="letter__ask"
+									data-type="Will you be my Ninong/Ninang?"
+								></p>
+								<p
+									class="letter__sign"
+									data-type="Love, Baby Szhawn"
+								></p>
+							</div>
+
+							<!-- Screen-reader version (full text, no typing) -->
+							<div class="sr-only">
+								<p>Dear Tito/Tita,</p>
+								<p>Hi po! I'm Baby Szhawn!</p>
+								<p>
+									My special day is coming soon, and Mommy and
+									Daddy would be very happy if you could be
+									part of my journey as I grow in faith and
+									love.
+								</p>
+								<p>
+									It would mean so much to me if you would say
+									YES and become my Ninong/Ninang. I hope
+									you'll guide me, pray for me, and be part of
+									the many beautiful memories I'll make as I
+									grow up.
+								</p>
+								<p>
+									Sorry po if this invitation comes a little
+									late, but I truly hope you'll say YES!
+								</p>
+								<p>Will you be my Ninong/Ninang?</p>
+								<p>Love, Baby Szhawn</p>
+							</div>
+
+							<div class="actions">
+								<button
+									class="btn btn--premium is-hidden"
+									id="toScene3"
+									type="button"
 								>
-							</button>
+									<span class="btn__text">Continue</span>
+									<span class="btn__icon" aria-hidden="true"
+										>→</span
+									>
+								</button>
+							</div>
 						</div>
 					</div>
-				</div>
-				<!-- Floating Scroll Indicator -->
-				<button
-					id="scrollIndicator"
-					class="scroll-indicator is-hidden"
-					type="button"
-					aria-label="Scroll down for more"
+				</section>
+
+				<!-- ========================= SCENE 3 ========================= -->
+				<section class="scene" id="scene3" aria-labelledby="s3-title">
+					<div class="scene__inner">
+						<div class="scene__content" tabindex="-1">
+							<span class="eyebrow reveal" style="--d: 0.05s"
+								>A Gentle Reminder</span
+							>
+
+							<h2
+								class="title reveal"
+								id="s3-title"
+								style="--d: 0.15s"
+							>
+								Ninong &amp; Ninang!
+							</h2>
+
+							<div
+								class="divider reveal"
+								style="--d: 0.25s"
+								aria-hidden="true"
+							>
+								<i></i>
+							</div>
+
+							<p class="lede reveal" style="--d: 0.3s">
+								My Baptismal Ceremony will be on:
+							</p>
+
+							<dl class="details reveal" style="--d: 0.4s">
+								<div>
+									<dt>Date</dt>
+									<dd>
+										December 13, 2026
+										<small>(Sunday)</small>
+									</dd>
+								</div>
+								<div>
+									<dt>Time</dt>
+									<dd>12:00 NN</dd>
+								</div>
+								<div>
+									<dt>Venue</dt>
+									<dd>
+										San Francisco de Assisi Parish Church<br />
+										<small
+											>Gasak, Meycauayan, Bulacan</small
+										>
+									</dd>
+								</div>
+							</dl>
+
+							<p class="note reveal" style="--d: 0.5s">
+								Please come and join me on my special day! We
+								will also have a short photo session after the
+								ceremony inside the church.
+							</p>
+
+							<p class="signoff reveal" style="--d: 0.6s">
+								I hope to see you there!<br />
+								Love, <strong>Baby Szhawn</strong>
+							</p>
+						</div>
+					</div>
+				</section>
+			</div>
+
+			<!-- Background Audio (Update src to your actual file name) -->
+			<audio
+				id="scene2Audio"
+				src="scene2-voice.mp3"
+				preload="auto"
+			></audio>
+
+			<!-- Mute/Unmute Toggle -->
+			<button
+				id="audioToggle"
+				class="audio-toggle"
+				type="button"
+				aria-label="Toggle background music"
+			>
+				<!-- Unmuted Icon (Speaker with waves) -->
+				<svg
+					id="iconUnmuted"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
 				>
-					<svg
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<polyline points="6 9 12 15 18 9"></polyline>
-					</svg>
-				</button>
-			</section>
+					<polygon
+						points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"
+					></polygon>
+					<path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+					<path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+				</svg>
 
-			<!-- ========================= SCENE 3 ========================= -->
-			<section class="scene" id="scene3" aria-labelledby="s3-title">
-				<div class="scene__inner">
-					<div class="scene__content" tabindex="-1">
-						<span class="eyebrow reveal" style="--d: 0.05s"
-							>A Gentle Reminder</span
-						>
+				<!-- Muted Icon (Speaker with X) - Hidden by default -->
+				<svg
+					id="iconMuted"
+					class="is-hidden"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<polygon
+						points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"
+					></polygon>
+					<line x1="23" y1="9" x2="17" y2="15"></line>
+					<line x1="17" y1="9" x2="23" y2="15"></line>
+				</svg>
+			</button>
 
-						<h2
-							class="title reveal"
-							id="s3-title"
-							style="--d: 0.15s"
-						>
-							Ninong &amp; Ninang!
-						</h2>
+			<!-- Floating Scroll Indicator -->
+			<button
+				id="scrollIndicator"
+				class="scroll-indicator is-hidden"
+				type="button"
+				aria-label="Scroll down for more"
+			>
+				<svg
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<polyline points="6 9 12 15 18 9"></polyline>
+				</svg>
+			</button>
 
-						<div
-							class="divider reveal"
-							style="--d: 0.25s"
-							aria-hidden="true"
-						>
-							<i></i>
-						</div>
+			<!-- Swipe Hint -->
+			<div class="swipe-hint" id="swipeHint">
+				Swipe to explore <span>↔</span>
+			</div>
 
-						<p class="lede reveal" style="--d: 0.3s">
-							My Baptismal Ceremony will be on:
-						</p>
-
-						<dl class="details reveal" style="--d: 0.4s">
-							<div>
-								<dt>Date</dt>
-								<dd>
-									December 13, 2026 <small>(Sunday)</small>
-								</dd>
-							</div>
-							<div>
-								<dt>Time</dt>
-								<dd>12:00 NN</dd>
-							</div>
-							<div>
-								<dt>Venue</dt>
-								<dd>
-									San Francisco de Assisi Parish Church<br />
-									<small>Gasak, Meycauayan, Bulacan</small>
-								</dd>
-							</div>
-						</dl>
-
-						<p class="note reveal" style="--d: 0.5s">
-							Please come and join me on my special day! We will
-							also have a short photo session after the ceremony
-							inside the church.
-						</p>
-
-						<p class="signoff reveal" style="--d: 0.6s">
-							I hope to see you there!<br />
-							Love, <strong>Baby Szhawn</strong>
-						</p>
-					</div>
-				</div>
-			</section>
+			<!-- Pagination Dots -->
+			<div class="pagination" id="pagination">
+				<button
+					class="dot is-active"
+					data-scene="1"
+					aria-label="Go to Scene 1"
+				></button>
+				<button
+					class="dot"
+					data-scene="2"
+					aria-label="Go to Scene 2"
+				></button>
+				<button
+					class="dot"
+					data-scene="3"
+					aria-label="Go to Scene 3"
+				></button>
+			</div>
 		</main>
 
 		<script src="script.js"></script>

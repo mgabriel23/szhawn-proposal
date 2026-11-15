@@ -184,66 +184,77 @@ body {
 }
 
 /* ============================================================
-   STAGE + SCENES  (crossfade + soft lift)
+   STAGE + SCENES (Carousel Track)
    ============================================================ */
 .stage {
 	position: fixed;
 	inset: 0;
 	z-index: 1;
+	overflow: hidden;
+}
+
+.stage-track {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	transition: transform 0.85s var(--ease);
+	will-change: transform;
 }
 
 .scene {
-	position: absolute;
-	inset: 0;
+	flex: 0 0 100%;
+	width: 100%;
+	height: 100%;
+	position: relative;
 	overflow-y: auto;
 	overflow-x: hidden;
 	overscroll-behavior: contain;
 	-webkit-overflow-scrolling: touch;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(198, 168, 124, 0.45) transparent;
+	touch-action: pan-y;
+	pointer-events: none;
 
-	opacity: 0;
-	visibility: hidden;
-	pointer-events: none;
-	transform: translate3d(0, 26px, 0) scale(0.988);
-	transition:
-		opacity 0.85s ease,
-		transform 0.95s var(--ease),
-		visibility 0s linear 0.95s;
+	/* ADDED: Forces the inner content to center horizontally on all screens */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
+
 .scene.is-active {
-	opacity: 1;
-	visibility: visible;
 	pointer-events: auto;
-	transform: none;
-	transition:
-		opacity 0.85s ease,
-		transform 0.95s var(--ease),
-		visibility 0s linear 0s;
 }
-.scene.is-leaving {
-	opacity: 0;
-	visibility: visible;
-	pointer-events: none;
-	transform: translate3d(0, -18px, 0) scale(0.992);
-	transition:
-		opacity 0.55s ease,
-		transform 0.65s var(--ease),
-		visibility 0s linear 0.65s;
-}
+
+/* ============================================================
+   SCENE LAYOUT & PADDING FIXES
+   ============================================================ */
 
 .scene__inner {
-	min-height: 100%;
 	width: 100%;
 	max-width: 700px;
 	margin: 0 auto;
 	padding: clamp(20px, 6vw, 48px);
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	min-height: 100%; /* Restores the height requirement */
 }
 
-/* Plain text content — no card, border, background, or shadow */
+/* Scene 1 & 3: Center vertically and leave room for the dots */
+#scene1 .scene__inner,
+#scene3 .scene__inner {
+	justify-content: center;
+	padding-bottom: 100px;
+	padding-top: 40px;
+}
+
+/* Scene 2: Align to top so the text doesn't get cut off */
+#scene2 .scene__inner {
+	justify-content: flex-start;
+	padding-top: clamp(40px, 8vh, 80px);
+	padding-bottom: 140px;
+}
+
+/* Restores the perfect centering for the text */
 .scene__content {
 	width: 100%;
 	max-width: 640px;
@@ -252,13 +263,9 @@ body {
 	text-align: center;
 	outline: none;
 }
-.scene__content:focus-visible {
-	outline: 2px solid var(--gold-deep);
-	outline-offset: 8px;
-	border-radius: 4px;
-}
+
 .scene__content--letter {
-	max-width: 620px;
+	max-width: 660px;
 	text-align: left;
 }
 
@@ -445,7 +452,7 @@ body {
 .progress {
 	position: relative;
 	height: 2px;
-	margin-top: clamp(12px, 3.2vw, 16px);
+	margin-top: clamp(24px, 3.2vw, 16px);
 	background: rgba(198, 168, 124, 0.16);
 	border-radius: 2px;
 	overflow: hidden;
@@ -831,22 +838,61 @@ body {
 }
 
 /* ============================================================
-   SCENE 2 — FLOATING SCROLL INDICATOR
+   FLOATING BUTTONS (Audio & Scroll Indicator)
    ============================================================ */
 
+/* 1. Audio Toggle - FORCED HIDDEN BY DEFAULT */
+.audio-toggle {
+	position: fixed;
+	top: clamp(16px, 4vh, 24px);
+	right: clamp(16px, 4vw, 24px);
+	z-index: 50;
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+	background: rgba(253, 250, 247, 0.75);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border: 1px solid rgba(198, 168, 124, 0.4);
+	box-shadow: 0 8px 16px -6px rgba(74, 63, 82, 0.15);
+	color: var(--gold-deep);
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition:
+		opacity 0.4s ease,
+		transform 0.4s var(--ease);
+
+	/* Forces it hidden on load */
+	display: none;
+	opacity: 0;
+}
+
+/* Only show it when JS applies this class */
+.audio-toggle.is-visible {
+	display: flex;
+	opacity: 1;
+}
+
+.audio-toggle:hover {
+	background: rgba(253, 250, 247, 1);
+	transform: scale(1.05);
+}
+
+.audio-toggle .is-hidden {
+	display: none;
+}
+
+/* 2. Scroll Indicator - MOVED TO BOTTOM RIGHT */
 .scroll-indicator {
 	position: fixed;
-	bottom: clamp(24px, 5vh, 40px);
-	left: 50%;
-	/* We use translateX(-50%) to center it, and animate the Y axis */
-	transform: translateX(-50%) translateY(0);
-	z-index: 20; /* Above the bottom fade */
-
+	bottom: 85px; /* Above the dots */
+	right: 24px;
+	left: auto; /* Overrides old center rules */
+	z-index: 20;
 	width: 48px;
 	height: 48px;
 	border-radius: 50%;
-
-	/* Frosted Glass aesthetic */
 	background: rgba(253, 250, 247, 0.75);
 	backdrop-filter: blur(8px);
 	-webkit-backdrop-filter: blur(8px);
@@ -854,91 +900,274 @@ body {
 	box-shadow:
 		0 10px 20px -8px rgba(74, 63, 82, 0.25),
 		inset 0 1px 0 rgba(255, 255, 255, 0.8);
-
 	color: var(--gold-deep);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
 
+	/* Reset old transforms */
+	transform: translateY(0);
 	transition:
-		opacity 0.5s ease,
-		visibility 0.5s ease,
-		transform 0.4s var(--ease),
-		background 0.3s ease,
-		box-shadow 0.3s ease;
-
-	animation: bounceIndicator 2.5s infinite ease-in-out;
+		opacity 0.4s ease,
+		visibility 0.4s ease,
+		transform 0.4s var(--ease);
+	animation: bounceIndicatorRight 2.5s infinite ease-in-out;
 }
 
-/* Hidden state */
 .scroll-indicator.is-hidden {
 	opacity: 0;
 	visibility: hidden;
-	transform: translateX(-50%) translateY(20px);
 	pointer-events: none;
+	transform: translateY(20px);
 }
 
-.scroll-indicator:hover {
-	background: rgba(253, 250, 247, 0.95);
-	box-shadow:
-		0 14px 24px -8px rgba(176, 143, 99, 0.4),
-		inset 0 1px 0 rgba(255, 255, 255, 1);
-	/* Pause the bounce on hover so it's easier to click */
-	animation-play-state: paused;
-}
-
-@keyframes bounceIndicator {
+/* New animation that doesn't force center alignment */
+@keyframes bounceIndicatorRight {
 	0%,
 	20%,
 	50%,
 	80%,
 	100% {
-		transform: translateX(-50%) translateY(0);
+		transform: translateY(0);
 	}
 	40% {
-		transform: translateX(-50%) translateY(-6px);
+		transform: translateY(-6px);
 	}
 	60% {
-		transform: translateX(-50%) translateY(-3px);
+		transform: translateY(-3px);
 	}
 }
 
 /* ============================================================
-   AUDIO TOGGLE BUTTON
+   LAYOUT FIXES & CENTERING
    ============================================================ */
+
+/* Scene 1 & 3: Center content nicely and leave room for the dots */
+#scene1 .scene__inner,
+#scene3 .scene__inner {
+	justify-content: center;
+	padding-bottom: 100px; /* Prevents text from hiding behind the dots */
+	padding-top: 40px;
+}
+
+/* Scene 2: Align to top so the text doesn't get cut off */
+#scene2 .scene__inner {
+	justify-content: flex-start;
+	padding-top: clamp(40px, 8vh, 80px);
+	padding-bottom: 140px; /* Room for the button and dots */
+}
+
+/* ============================================================
+   SWIPE HINT
+   ============================================================ */
+.swipe-hint {
+	position: fixed;
+	bottom: 70px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 50;
+
+	font-family: var(--sans);
+	font-size: clamp(0.65rem, 2.8vw, 0.75rem);
+	font-weight: 700;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: var(--gold-deep);
+	opacity: 0.8;
+	pointer-events: none;
+
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	transition:
+		opacity 0.8s ease,
+		visibility 0.8s;
+}
+
+.swipe-hint span {
+	font-size: 1.4em;
+	animation: pulseArrow 2s infinite ease-in-out;
+}
+
+.swipe-hint.is-hidden {
+	opacity: 0;
+	visibility: hidden;
+}
+
+@keyframes pulseArrow {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(6px);
+	}
+}
+
+/* ============================================================
+   PAGINATION DOTS
+   ============================================================ */
+.pagination {
+	position: fixed;
+	bottom: clamp(20px, 4vh, 32px);
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 50;
+
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	justify-content: center;
+
+	background: rgba(253, 250, 247, 0.6);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	padding: 10px 18px;
+	border-radius: 999px;
+	border: 1px solid rgba(198, 168, 124, 0.2);
+	box-shadow: 0 10px 20px -10px rgba(74, 63, 82, 0.1);
+}
+
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: rgba(198, 168, 124, 0.3);
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	transition: all 0.4s var(--ease);
+}
+
+.dot:hover {
+	background: rgba(198, 168, 124, 0.6);
+}
+
+.dot.is-active {
+	background: var(--gold-deep);
+	transform: scale(1.4);
+	box-shadow: 0 0 10px rgba(176, 143, 99, 0.5);
+}
+
+/* 320px Screen Adjustments */
+@media (max-width: 360px) {
+	.swipe-hint {
+		bottom: 60px;
+	}
+	.pagination {
+		bottom: 16px;
+		padding: 8px 14px;
+	}
+	#scene1 .scene__inner,
+	#scene3 .scene__inner {
+		padding-bottom: 80px;
+	}
+}
+
+/* ============================================================
+   FLOATING BUTTONS (Audio & Scroll Indicator)
+   ============================================================ */
+
+/* 1. Audio Toggle - HIDDEN BY DEFAULT */
 .audio-toggle {
 	position: fixed;
 	top: clamp(16px, 4vh, 24px);
 	right: clamp(16px, 4vw, 24px);
 	z-index: 50;
-
 	width: 42px;
 	height: 42px;
 	border-radius: 50%;
-
-	/* Frosted glass look */
 	background: rgba(253, 250, 247, 0.75);
 	backdrop-filter: blur(8px);
 	-webkit-backdrop-filter: blur(8px);
 	border: 1px solid rgba(198, 168, 124, 0.4);
 	box-shadow: 0 8px 16px -6px rgba(74, 63, 82, 0.15);
+	color: var(--gold-deep);
 
+	/* Default state: hidden */
+	display: none;
+	opacity: 0;
+
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition:
+		opacity 0.4s ease,
+		transform 0.4s var(--ease),
+		background 0.3s ease;
+}
+
+/* Show only when JS adds .is-visible */
+.audio-toggle.is-visible {
+	display: flex;
+	opacity: 1;
+}
+
+.audio-toggle:hover {
+	background: rgba(253, 250, 247, 1);
+	transform: scale(1.05);
+}
+
+/* Ensure SVG icons inside the button are sized and colored correctly */
+.audio-toggle svg {
+	width: 20px;
+	height: 20px;
+	stroke: currentColor;
+	fill: none;
+}
+
+/* 2. Scroll Indicator - BOTTOM RIGHT */
+.scroll-indicator {
+	position: fixed;
+	bottom: 85px;
+	right: 24px;
+	left: auto;
+	z-index: 20;
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	background: rgba(253, 250, 247, 0.75);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border: 1px solid rgba(198, 168, 124, 0.4);
+	box-shadow:
+		0 10px 20px -8px rgba(74, 63, 82, 0.25),
+		inset 0 1px 0 rgba(255, 255, 255, 0.8);
 	color: var(--gold-deep);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
 
-	transition: all 0.3s ease;
+	/* Animation */
+	transform: translateY(0);
+	transition:
+		opacity 0.4s ease,
+		visibility 0.4s ease,
+		transform 0.4s var(--ease);
+	animation: bounceIndicatorRight 2.5s infinite ease-in-out;
 }
 
-.audio-toggle:hover {
-	background: rgba(253, 250, 247, 1);
-	transform: scale(1.05);
-	box-shadow: 0 10px 20px -6px rgba(176, 143, 99, 0.3);
+.scroll-indicator.is-hidden {
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transform: translateY(20px);
 }
 
-.audio-toggle .is-hidden {
-	display: none;
+@keyframes bounceIndicatorRight {
+	0%,
+	20%,
+	50%,
+	80%,
+	100% {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(-6px);
+	}
+	60% {
+		transform: translateY(-3px);
+	}
 }

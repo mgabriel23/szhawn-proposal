@@ -2,8 +2,8 @@
 	"use strict";
 
 	/* ---------------------------------------------------------
-     Elements
-     --------------------------------------------------------- */
+	 Elements
+	 --------------------------------------------------------- */
 	var scenes = {
 		1: document.getElementById("scene1"),
 		2: document.getElementById("scene2"),
@@ -38,12 +38,20 @@
 	var iconMuted = document.getElementById("iconMuted");
 	var audioFadeInterval = null;
 
+	var stageTrack = document.getElementById('stageTrack');
+	var touchStartX = 0;
+	var touchStartY = 0;
+
+	var swipeHint = document.getElementById('swipeHint');
+	var dots = document.querySelectorAll('.dot');
+	var hintTimeout;
+
 	/* ---------------------------------------------------------
-     Layout stability
-     Every paragraph permanently reserves the height of its FULL
-     text from the very first frame, so the page never reflows
-     or jumps while characters are being typed in.
-     --------------------------------------------------------- */
+	 Layout stability
+	 Every paragraph permanently reserves the height of its FULL
+	 text from the very first frame, so the page never reflows
+	 or jumps while characters are being typed in.
+	 --------------------------------------------------------- */
 	function reserveHeights() {
 		for (var i = 0; i < paras.length; i++) {
 			var p = paras[i];
@@ -76,8 +84,8 @@
 	);
 
 	/* ---------------------------------------------------------
-     Scene routing — outgoing lifts, incoming rises (crossfade)
-     --------------------------------------------------------- */
+	 Scene routing — outgoing lifts, incoming rises (crossfade)
+	 --------------------------------------------------------- */
 	function focusContent(scene) {
 		var el = scene.querySelector(".scene__content");
 		if (el) {
@@ -96,45 +104,80 @@
 		var prev = scenes[activeScene];
 		var next = scenes[n];
 
-		// Handle Audio Fading based on scene changes
+		// --- LEAVING SCENE 2 ---
 		if (activeScene === 2 && n !== 2) {
-			pauseAudioFadeOut();
-		}
-		if (n === 2) {
-			playAudioFadeIn();
+			pauseAudio(); // Replaced pauseAudioFadeOut()
+
+			// Pause the typewriter without resetting it
+			if (typing) {
+				window.clearTimeout(typeTimer);
+				typing = false;
+				var currentP = paras[pIndex];
+				if (currentP) currentP.classList.remove("is-typing");
+			}
 		}
 
-		prev.classList.add("is-leaving");
-		prev.classList.remove("is-active");
+		// --- ENTERING SCENE 2 ---
+		if (n === 2) {
+			audioToggleBtn.classList.add('is-visible');
+			playAudio(); // Replaced playAudioFadeIn()
+
+			if (!letterStarted) {
+				startLetter();
+			} else if (!letterCompleted) {
+				// Resume typing from where it paused
+				typing = true;
+				var p = paras[pIndex];
+				if (p) p.classList.add("is-typing");
+				typeTimer = window.setTimeout(typeStep, 500);
+			}
+		} else {
+			audioToggleBtn.classList.remove('is-visible');
+		}
+
+		// Hide Scroll Indicator when leaving scene 2
+		if (n !== 2) {
+			scrollIndicator.classList.add('is-hidden');
+		}
+
+		// Update classes & slide
+		prev.classList.remove('is-active');
+		next.classList.add('is-active');
+		stageTrack.style.transform = 'translateX(-' + ((n - 1) * 100) + '%)';
+		next.scrollTop = 0;
+
+		// Update Dots
+		dots.forEach(function (dot) {
+			dot.classList.remove('is-active');
+			if (parseInt(dot.getAttribute('data-scene')) === n) {
+				dot.classList.add('is-active');
+			}
+		});
+
+		swipeHint.classList.add('is-hidden');
+		window.clearTimeout(hintTimeout);
+		activeScene = n;
 
 		window.setTimeout(function () {
-			prev.classList.remove("is-leaving");
-			prev.scrollTop = 0;
-
-			next.classList.add("is-active");
-			next.scrollTop = 0;
-
-			activeScene = n;
 			locked = false;
-
 			focusContent(next);
-
-			if (n === 2) startLetter();
-		}, 340);
+			if (n === 2) {
+				updateScrollIndicator();
+			}
+		}, 850);
 	}
 
-	openBtn.addEventListener("click", function () {
-		goTo(2);
-	});
 	continueBtn.addEventListener("click", function () {
 		goTo(3);
 	});
 
 	/* ---------------------------------------------------------
-     Typewriter state
-     --------------------------------------------------------- */
+	 Typewriter state
+	 --------------------------------------------------------- */
 	var typeTimer = null;
 	var typing = false;
+	var letterStarted = false;   // ADD THIS
+	var letterCompleted = false; // ADD THIS
 	var pIndex = 0;
 	var cIndex = 0;
 	var typedChars = 0;
@@ -144,58 +187,34 @@
 			"scaleX(" + Math.max(0, Math.min(1, ratio)).toFixed(4) + ")";
 	}
 
-	// Smooth fade-in for audio
-	function playAudioFadeIn() {
+	// Simple play/pause without fading to prevent cut-off sounds
+	function playAudio() {
 		if (!audio) return;
-		window.clearInterval(audioFadeInterval);
-		audio.volume = 0;
+		audio.volume = 0.5; // Set comfortable background volume
 		audio.play().catch(function (e) {
 			console.log("Audio autoplay blocked:", e);
 		});
-
-		var vol = 0;
-		audioFadeInterval = setInterval(function () {
-			if (vol < 0.5) {
-				// 0.5 is a comfortable background volume
-				vol += 0.05;
-				audio.volume = Math.min(vol, 0.5);
-			} else {
-				clearInterval(audioFadeInterval);
-			}
-		}, 100);
 	}
 
-	// Smooth fade-out for audio
-	function pauseAudioFadeOut() {
-		if (!audio) return;
-		window.clearInterval(audioFadeInterval);
-		var vol = audio.volume;
-
-		audioFadeInterval = setInterval(function () {
-			if (vol > 0.05) {
-				vol -= 0.05;
-				audio.volume = Math.max(vol, 0);
-			} else {
-				audio.pause();
-				clearInterval(audioFadeInterval);
-			}
-		}, 100);
+	function pauseAudio() {
+		if (!audio || audio.paused) return;
+		audio.pause();
 	}
 
 	function updateScrollIndicator() {
-		if (activeScene !== 2) return;
+		// Force hide if we are not on Scene 2
+		if (activeScene !== 2) {
+			scrollIndicator.classList.add('is-hidden');
+			return;
+		}
 
-		// Check if there is actually content to scroll to (buffer of 20px)
 		var hasOverflow = scene2.scrollHeight > scene2.clientHeight + 20;
-
-		// Check if the user is already at the bottom (buffer of 40px)
-		var isAtBottom =
-			scene2.scrollTop + scene2.clientHeight >= scene2.scrollHeight - 40;
+		var isAtBottom = scene2.scrollTop + scene2.clientHeight >= scene2.scrollHeight - 40;
 
 		if (hasOverflow && !isAtBottom) {
-			scrollIndicator.classList.remove("is-hidden");
+			scrollIndicator.classList.remove('is-hidden');
 		} else {
-			scrollIndicator.classList.add("is-hidden");
+			scrollIndicator.classList.add('is-hidden');
 		}
 	}
 
@@ -218,11 +237,12 @@
 	}
 
 	/* The letter always finishes typing at its own pace. No scroll,
-     no scrollIntoView — the reader stays exactly where they are.
-     The Continue button simply fades in inside its reserved slot. */
+	 no scrollIntoView — the reader stays exactly where they are.
+	 The Continue button simply fades in inside its reserved slot. */
 	function completeLetter() {
 		window.clearTimeout(typeTimer);
 		typing = false;
+		letterCompleted = true; // Mark as complete so it never restarts
 
 		for (var i = 0; i < paras.length; i++) {
 			paras[i].textContent = paras[i].getAttribute("data-type");
@@ -236,9 +256,9 @@
 	}
 
 	/* ---------------------------------------------------------
-     Typing loop — no auto-scroll, no interruptions.
-     The letter always types through to the very end.
-     --------------------------------------------------------- */
+	 Typing loop — no auto-scroll, no interruptions.
+	 The letter always types through to the very end.
+	 --------------------------------------------------------- */
 	function typeStep() {
 		if (!typing) return;
 
@@ -289,8 +309,9 @@
 	}
 
 	function startLetter() {
+		letterStarted = true;
+		letterCompleted = false;
 		resetLetter();
-		scrollIndicator.classList.add("is-hidden");
 
 		if (reduceMotion) {
 			completeLetter();
@@ -299,7 +320,7 @@
 
 		typing = true;
 		paras[0].classList.add("is-typing");
-		typeTimer = window.setTimeout(typeStep, 700); // let the scene settle first
+		typeTimer = window.setTimeout(typeStep, 700);
 	}
 
 	// Mute / Unmute Toggle
@@ -318,8 +339,8 @@
 	}
 
 	/* ---------------------------------------------------------
-     Pause typing while the tab is hidden, resume when back
-     --------------------------------------------------------- */
+	 Pause typing while the tab is hidden, resume when back
+	 --------------------------------------------------------- */
 	document.addEventListener("visibilitychange", function () {
 		if (document.hidden) {
 			if (typing) window.clearTimeout(typeTimer);
@@ -338,4 +359,59 @@
 
 	// Listen for manual scrolling to hide/show the indicator
 	scene2.addEventListener("scroll", updateScrollIndicator, { passive: true });
+
+	/* ---------------------------------------------------------
+   Manual Carousel Controls (Swipe & Keyboard)
+   --------------------------------------------------------- */
+
+	// Touch Swipe Support
+	document.querySelector('.stage').addEventListener('touchstart', function (e) {
+		touchStartX = e.changedTouches[0].screenX;
+		touchStartY = e.changedTouches[0].screenY;
+	}, { passive: true });
+
+	document.querySelector('.stage').addEventListener('touchend', function (e) {
+		var touchEndX = e.changedTouches[0].screenX;
+		var touchEndY = e.changedTouches[0].screenY;
+
+		var diffX = touchEndX - touchStartX;
+		var diffY = touchEndY - touchStartY;
+
+		// Ignore if vertical scroll was dominant (user is reading/typing)
+		if (Math.abs(diffX) < Math.abs(diffY) || Math.abs(diffX) < 60) return;
+
+		if (diffX < -60 && activeScene < 3) {
+			// Swipe Left -> Next Scene
+			goTo(activeScene + 1);
+		} else if (diffX > 60 && activeScene > 1) {
+			// Swipe Right -> Previous Scene
+			goTo(activeScene - 1);
+		}
+	}, { passive: true });
+
+	// Keyboard Arrow Support (Desktop)
+	document.addEventListener('keydown', function (e) {
+		if (e.key === 'ArrowRight' && activeScene < 3) {
+			goTo(activeScene + 1);
+		} else if (e.key === 'ArrowLeft' && activeScene > 1) {
+			goTo(activeScene - 1);
+		}
+	});
+
+	/* ---------------------------------------------------------
+   Dot Navigation & Swipe Hint
+   --------------------------------------------------------- */
+
+	// Click a dot to navigate
+	dots.forEach(function (dot) {
+		dot.addEventListener('click', function () {
+			var target = parseInt(this.getAttribute('data-scene'));
+			goTo(target);
+		});
+	});
+
+	// Automatically fade out the swipe hint after 6 seconds if they haven't interacted yet
+	hintTimeout = setTimeout(function () {
+		swipeHint.classList.add('is-hidden');
+	}, 6000);
 })();
