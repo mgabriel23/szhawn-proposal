@@ -1,0 +1,944 @@
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root {
+	--ink: #4b4055;
+	--ink-soft: #7a6e85;
+	--body: #5b5065;
+	--letter: #544a5f;
+	--gold: #c6a87c;
+	--gold-deep: #b08f63;
+
+	--serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+	--sans: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+	--ease: cubic-bezier(0.22, 0.75, 0.28, 1);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	min-height: 100%;
+	overflow: hidden;
+	font-family: var(--sans);
+	color: var(--ink);
+	background-color: #fbf7f2;
+	background-image:
+		radial-gradient(
+			120% 90% at 12% 6%,
+			#f4e9f3 0%,
+			rgba(244, 233, 243, 0) 58%
+		),
+		radial-gradient(
+			110% 85% at 88% 12%,
+			#e6f0f1 0%,
+			rgba(230, 240, 241, 0) 55%
+		),
+		radial-gradient(
+			120% 90% at 50% 104%,
+			#fbe9ec 0%,
+			rgba(251, 233, 236, 0) 60%
+		),
+		linear-gradient(165deg, #fdf9f5 0%, #f7f2fa 48%, #f1f7f3 100%);
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* ============================================================
+   AMBIENT BACKGROUND
+   ============================================================ */
+.decor {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	overflow: hidden;
+}
+.orb {
+	position: absolute;
+	border-radius: 50%;
+	opacity: 0.55;
+	will-change: transform;
+	animation: drift 26s var(--ease) infinite alternate;
+}
+.orb--1 {
+	width: min(52vmin, 360px);
+	aspect-ratio: 1;
+	left: -10%;
+	top: -8%;
+	background: radial-gradient(
+		circle at 34% 30%,
+		#ffffff 0%,
+		rgba(233, 220, 244, 0.9) 44%,
+		rgba(233, 220, 244, 0) 72%
+	);
+	animation-duration: 30s;
+}
+.orb--2 {
+	width: min(46vmin, 320px);
+	aspect-ratio: 1;
+	right: -12%;
+	top: 6%;
+	background: radial-gradient(
+		circle at 40% 34%,
+		#ffffff 0%,
+		rgba(214, 235, 236, 0.85) 46%,
+		rgba(214, 235, 236, 0) 74%
+	);
+	animation-duration: 24s;
+	animation-delay: -6s;
+}
+.orb--3 {
+	width: min(56vmin, 400px);
+	aspect-ratio: 1;
+	left: 6%;
+	bottom: -18%;
+	background: radial-gradient(
+		circle at 46% 40%,
+		#ffffff 0%,
+		rgba(250, 224, 229, 0.9) 46%,
+		rgba(250, 224, 229, 0) 74%
+	);
+	animation-duration: 34s;
+	animation-delay: -12s;
+}
+.orb--4 {
+	width: min(38vmin, 260px);
+	aspect-ratio: 1;
+	right: -4%;
+	bottom: -10%;
+	background: radial-gradient(
+		circle at 40% 34%,
+		#ffffff 0%,
+		rgba(219, 236, 224, 0.85) 48%,
+		rgba(219, 236, 224, 0) 76%
+	);
+	animation-duration: 28s;
+	animation-delay: -3s;
+}
+.spark {
+	position: absolute;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: rgba(198, 168, 124, 0.75);
+	animation: twinkle 7s ease-in-out infinite;
+}
+.spark--1 {
+	left: 14%;
+	top: 26%;
+	animation-delay: -1s;
+}
+.spark--2 {
+	right: 18%;
+	top: 58%;
+	animation-delay: -3.4s;
+	width: 4px;
+	height: 4px;
+}
+.spark--3 {
+	left: 26%;
+	bottom: 16%;
+	animation-delay: -5.2s;
+	width: 6px;
+	height: 6px;
+}
+
+@keyframes drift {
+	from {
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	to {
+		transform: translate3d(4%, 6%, 0) scale(1.08);
+	}
+}
+@keyframes twinkle {
+	0%,
+	100% {
+		opacity: 0.12;
+		transform: scale(0.7);
+	}
+	50% {
+		opacity: 0.75;
+		transform: scale(1);
+	}
+}
+
+/* ============================================================
+   STAGE + SCENES  (crossfade + soft lift)
+   ============================================================ */
+.stage {
+	position: fixed;
+	inset: 0;
+	z-index: 1;
+}
+
+.scene {
+	position: absolute;
+	inset: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(198, 168, 124, 0.45) transparent;
+
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transform: translate3d(0, 26px, 0) scale(0.988);
+	transition:
+		opacity 0.85s ease,
+		transform 0.95s var(--ease),
+		visibility 0s linear 0.95s;
+}
+.scene.is-active {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+	transform: none;
+	transition:
+		opacity 0.85s ease,
+		transform 0.95s var(--ease),
+		visibility 0s linear 0s;
+}
+.scene.is-leaving {
+	opacity: 0;
+	visibility: visible;
+	pointer-events: none;
+	transform: translate3d(0, -18px, 0) scale(0.992);
+	transition:
+		opacity 0.55s ease,
+		transform 0.65s var(--ease),
+		visibility 0s linear 0.65s;
+}
+
+.scene__inner {
+	min-height: 100%;
+	width: 100%;
+	max-width: 700px;
+	margin: 0 auto;
+	padding: clamp(20px, 6vw, 48px);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+/* Plain text content — no card, border, background, or shadow */
+.scene__content {
+	width: 100%;
+	max-width: 640px;
+	margin: 0 auto;
+	padding: 0;
+	text-align: center;
+	outline: none;
+}
+.scene__content:focus-visible {
+	outline: 2px solid var(--gold-deep);
+	outline-offset: 8px;
+	border-radius: 4px;
+}
+.scene__content--letter {
+	max-width: 620px;
+	text-align: left;
+}
+
+/* ============================================================
+   TYPE
+   ============================================================ */
+.eyebrow {
+	display: block;
+	font-family: var(--sans);
+	font-size: clamp(0.62rem, 2.6vw, 0.72rem);
+	font-weight: 700;
+	letter-spacing: 0.32em;
+	text-transform: uppercase;
+	color: var(--gold-deep);
+}
+.title {
+	margin: 0.55em 0 0;
+	font-family: var(--serif);
+	font-weight: 400;
+	font-size: clamp(1.55rem, 6vw, 2.7rem);
+	line-height: 1.2;
+	letter-spacing: 0.005em;
+	color: var(--ink);
+	text-wrap: balance;
+}
+.lede {
+	margin: clamp(14px, 4vw, 20px) 0 0;
+	font-size: clamp(0.9rem, 3.4vw, 0.98rem);
+	line-height: 1.8;
+	color: var(--body);
+	text-wrap: pretty;
+}
+
+/* Divider */
+.divider {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin: clamp(18px, 4.5vw, 26px) 0;
+}
+.divider::before,
+.divider::after {
+	content: "";
+	height: 1px;
+	width: clamp(26px, 11vw, 62px);
+	background: linear-gradient(
+		90deg,
+		rgba(198, 168, 124, 0),
+		rgba(198, 168, 124, 0.65)
+	);
+}
+.divider::after {
+	background: linear-gradient(
+		90deg,
+		rgba(198, 168, 124, 0.65),
+		rgba(198, 168, 124, 0)
+	);
+}
+.divider i {
+	width: 6px;
+	height: 6px;
+	transform: rotate(45deg);
+	background: rgba(198, 168, 124, 0.75);
+}
+
+/* ============================================================
+   SCENE 1 — PORTRAIT SEATED ON THE BUTTON
+   ============================================================ */
+
+.sitter {
+	position: relative;
+	z-index: 10;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	/* Pulls the button up so the baby's hands rest on the top edge */
+	margin-bottom: -20px;
+}
+
+.sitter__img {
+	display: block;
+	width: clamp(280px, 80vw, 380px);
+	height: auto;
+	object-fit: contain;
+
+	/*
+	   If the baby isn't perfectly centered, adjust the X% here.
+	   (e.g., translateX(2%) or translateX(5%))
+	*/
+	transform: translateX(0) translateY(12px);
+	margin-left: -12px;
+
+	/*
+	   DUAL SHADOW:
+	   1. A tight, dark shadow right under the hands (contact shadow).
+	   2. A soft, wide shadow for the overall depth.
+	*/
+	filter: drop-shadow(0 5px 4px rgba(74, 63, 82, 0.5))
+		drop-shadow(0 15px 20px rgba(74, 63, 82, 0.15));
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5em;
+	min-height: 64px;
+	padding: clamp(0.85rem, 3.4vw, 1rem) clamp(1.6rem, 6vw, 2.4rem);
+	font-family: var(--sans);
+	font-size: clamp(0.78rem, 3.1vw, 0.88rem);
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #fffdfa;
+	background: linear-gradient(135deg, #d2b78e 0%, #b08f63 100%);
+	border: 0;
+	border-radius: 999px;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	box-shadow:
+		0 14px 28px -16px rgba(176, 143, 99, 0.95),
+		inset 0 1px 0 rgba(255, 255, 255, 0.35);
+	transition:
+		transform 0.4s var(--ease),
+		box-shadow 0.4s ease,
+		opacity 0.55s ease,
+		visibility 0s linear 0s;
+	max-width: 320px;
+}
+.btn:hover {
+	transform: translateY(-2px);
+	box-shadow:
+		0 20px 34px -18px rgba(176, 143, 99, 1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.btn:active {
+	transform: translateY(0) scale(0.99);
+}
+.btn:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 4px;
+}
+
+.btn--block {
+	width: 100%;
+}
+
+.btn.is-hidden {
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transform: translateY(10px) scale(0.97);
+	transition:
+		transform 0.4s var(--ease),
+		box-shadow 0.4s ease,
+		opacity 0.55s ease,
+		visibility 0s linear 0.55s;
+}
+
+/* ============================================================
+   SCENE 2 — THE LETTER
+   ============================================================ */
+
+/* Sticky invitation header — progress stays with the reader */
+.letter-head {
+	position: sticky;
+	top: 0;
+	z-index: 3;
+	margin: 0 0 clamp(14px, 3.5vw, 22px);
+	padding: 6px 0 clamp(10px, 2.6vw, 16px);
+	background: linear-gradient(
+		180deg,
+		rgba(253, 250, 247, 0.98) 0%,
+		rgba(253, 250, 247, 0.94) 55%,
+		rgba(253, 250, 247, 0) 100%
+	);
+}
+
+.progress {
+	position: relative;
+	height: 2px;
+	margin-top: clamp(12px, 3.2vw, 16px);
+	background: rgba(198, 168, 124, 0.16);
+	border-radius: 2px;
+	overflow: hidden;
+}
+.progress__bar {
+	display: block;
+	height: 100%;
+	width: 100%;
+	transform: scaleX(0);
+	transform-origin: 0 50%;
+	background: linear-gradient(
+		90deg,
+		rgba(217, 195, 160, 0.95),
+		var(--gold-deep)
+	);
+	transition: transform 0.25s linear;
+	will-change: transform;
+}
+
+/* The letter itself — serif, refined, premium */
+.letter {
+	font-family: var(--serif);
+	font-size: clamp(1.1rem, 4.4vw, 1.34rem);
+	line-height: 1.72;
+	letter-spacing: 0.004em;
+	color: var(--letter);
+}
+/* Each paragraph permanently reserves the height of its FULL text,
+   so the page never reflows or jumps while characters are typed. */
+.letter p {
+	margin: 0 0 0.92em;
+}
+.letter p:last-child {
+	margin-bottom: 0;
+}
+
+.letter__ask {
+	font-style: italic;
+	font-size: 1.16em;
+	line-height: 1.55;
+	color: var(--ink);
+	padding-top: 0.2em;
+}
+.letter__sign {
+	font-style: italic;
+	font-size: 1.1em;
+	color: var(--gold-deep);
+}
+
+.letter p.is-typing::after {
+	content: "";
+	display: inline-block;
+	width: 1px;
+	height: 0.95em;
+	margin-left: 3px;
+	vertical-align: -0.12em;
+	background: var(--gold-deep);
+	animation: blink 1.05s steps(1) infinite;
+}
+@keyframes blink {
+	0%,
+	50% {
+		opacity: 1;
+	}
+	51%,
+	100% {
+		opacity: 0;
+	}
+}
+
+/* Reserved slot for the Continue button — no layout shift on reveal */
+.actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 56px;
+	margin-top: clamp(20px, 5.5vw, 30px);
+}
+
+/* ============================================================
+   SCENE 3 — DETAILS
+   ============================================================ */
+.details {
+	display: grid;
+	gap: clamp(14px, 4vw, 20px);
+	margin: clamp(20px, 5.5vw, 30px) 0 0;
+	padding: 0;
+}
+.details > div {
+	display: grid;
+	gap: 3px;
+}
+.details dt {
+	font-size: clamp(0.6rem, 2.5vw, 0.68rem);
+	font-weight: 700;
+	letter-spacing: 0.28em;
+	text-transform: uppercase;
+	color: var(--gold-deep);
+}
+.details dd {
+	margin: 0;
+	font-family: var(--serif);
+	font-size: clamp(1.05rem, 4vw, 1.32rem);
+	line-height: 1.4;
+	color: var(--ink);
+}
+.details dd small {
+	font-family: var(--sans);
+	font-size: 0.66em;
+	font-weight: 400;
+	color: var(--ink-soft);
+}
+.note {
+	margin: clamp(18px, 5vw, 26px) 0 0;
+	font-size: clamp(0.88rem, 3.3vw, 0.96rem);
+	line-height: 1.8;
+	color: var(--body);
+	text-wrap: pretty;
+}
+.signoff {
+	margin: clamp(16px, 4.5vw, 22px) 0 0;
+	font-family: var(--serif);
+	font-style: italic;
+	font-size: clamp(1rem, 3.8vw, 1.15rem);
+	line-height: 1.6;
+	color: var(--gold-deep);
+}
+.signoff strong {
+	font-weight: 500;
+	color: var(--ink);
+}
+
+/* ============================================================
+   REVEAL / POP-IN
+   ============================================================ */
+.reveal {
+	opacity: 0;
+	transform: translateY(18px);
+}
+.is-active .reveal {
+	animation: rise 0.95s var(--ease) forwards;
+	animation-delay: var(--d, 0s);
+}
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(18px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+	}
+	.reveal {
+		opacity: 1 !important;
+		transform: none !important;
+	}
+	.letter p.is-typing::after {
+		display: none;
+	}
+}
+
+/* ============================================================
+   SMALL SCREENS (≤360px)
+   ============================================================ */
+@media (max-width: 360px) {
+	.scene__inner {
+		padding: 18px 16px;
+	}
+	.letter {
+		font-size: 1.08rem;
+	}
+	.actions {
+		min-height: 52px;
+	}
+	.btn--block {
+		width: 100%;
+	}
+}
+
+/* ============================================================
+   SCENE 2 — PREMIUM UPGRADES
+   ============================================================ */
+
+/* Make the header title bigger and more elegant */
+.letter-head .eyebrow {
+	font-size: clamp(0.75rem, 3.2vw, 0.9rem);
+	letter-spacing: 0.4em;
+	color: var(--gold-deep);
+	margin-bottom: 4px;
+	text-shadow: 0 1px 2px rgba(198, 168, 124, 0.2);
+}
+
+/* Make the letter text larger, more readable, and give it a premium feel */
+.letter {
+	font-family: var(--serif);
+	font-size: clamp(1.25rem, 5vw, 1.55rem); /* Increased size */
+	line-height: 1.8;
+	letter-spacing: 0.01em;
+	color: var(--letter);
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6); /* Soft embossed look */
+}
+
+.letter p {
+	margin: 0 0 1.1em; /* Slightly more breathing room between paragraphs */
+	opacity: 0.95;
+	transition: opacity 0.4s ease;
+}
+
+/* Add a subtle glow to the caret so it feels softer */
+.letter p.is-typing::after {
+	width: 2px;
+	background: var(--gold);
+	box-shadow: 0 0 6px rgba(198, 168, 124, 0.8);
+}
+
+/* ============================================================
+   PREMIUM BUTTON (Continue Button)
+   ============================================================ */
+
+.btn--premium {
+	position: relative;
+	overflow: hidden;
+	background: linear-gradient(135deg, #e8d5b5 0%, #c6a87c 50%, #b08f63 100%);
+	border: 1px solid rgba(255, 255, 255, 0.4);
+	box-shadow:
+		0 10px 25px -10px rgba(176, 143, 99, 0.8),
+		inset 0 2px 4px rgba(255, 255, 255, 0.5),
+		inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 18px 32px;
+	transition: all 0.4s var(--ease);
+}
+
+/* The shimmering sweep effect */
+.btn--premium::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 50%;
+	height: 100%;
+	background: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0) 0%,
+		rgba(255, 255, 255, 0.4) 50%,
+		rgba(255, 255, 255, 0) 100%
+	);
+	transform: skewX(-25deg);
+	animation: shimmer 4s infinite;
+}
+
+@keyframes shimmer {
+	0% {
+		left: -100%;
+	}
+	20% {
+		left: 200%;
+	}
+	100% {
+		left: 200%;
+	}
+}
+
+.btn--premium:hover {
+	transform: translateY(-3px) scale(1.02);
+	box-shadow:
+		0 15px 30px -12px rgba(176, 143, 99, 1),
+		inset 0 2px 4px rgba(255, 255, 255, 0.6),
+		inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn--premium .btn__text {
+	font-weight: 700;
+	letter-spacing: 0.15em;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+	position: relative;
+	z-index: 1;
+}
+
+.btn--premium .btn__icon {
+	font-size: 1.2em;
+	transition: transform 0.4s var(--ease);
+	position: relative;
+	z-index: 1;
+}
+
+.btn--premium:hover .btn__icon {
+	transform: translateX(4px);
+}
+
+/* ============================================================
+   TYPOGRAPHY & LAYOUT FIXES
+   ============================================================ */
+.scene__content--letter {
+	max-width: 660px; /* Slightly wider to fit bigger text comfortably */
+}
+
+/* ============================================================
+   SCENE 2 — NATURAL SCROLLING WITH NATIVE APP FADES
+   ============================================================ */
+
+/* 1. Remove the sticky positioning and the background from the header */
+#scene2 .letter-head {
+	position: static; /* Scrolls normally with the text */
+	margin: 0 0 clamp(16px, 4vw, 24px);
+	padding: 0;
+	background: transparent;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	border-bottom: none;
+}
+
+/* 2. Top Fade (Text gently fades out as it approaches the top edge) */
+#scene2::before {
+	content: "";
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: clamp(70px, 12vh, 110px);
+	background: linear-gradient(
+		to bottom,
+		#fbf7f2 15%,
+		rgba(251, 247, 242, 0) 100%
+	);
+	pointer-events: none;
+	z-index: 10;
+}
+
+/* 3. Bottom Fade (Text gently fades out before hitting the bottom edge) */
+#scene2::after {
+	content: "";
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: clamp(100px, 18vh, 160px);
+	background: linear-gradient(
+		to top,
+		#fbf7f2 15%,
+		rgba(251, 247, 242, 0) 100%
+	);
+	pointer-events: none;
+	z-index: 10;
+}
+
+/* 4. Ensure the scene starts from the top and has padding for the fades */
+#scene2 .scene__inner {
+	justify-content: flex-start; /* Prevents the top of the text from being cut off */
+	padding-top: clamp(
+		40px,
+		8vh,
+		80px
+	); /* Space so the header doesn't start hidden under the top fade */
+	padding-bottom: clamp(
+		120px,
+		20vh,
+		200px
+	); /* Space for the button and bottom fade */
+}
+
+/* 5. Keep the Continue button safe above the bottom fade */
+#scene2 .actions {
+	position: relative;
+	z-index: 15; /* Ensures the button stays clickable and visible above the fade */
+	margin-top: clamp(30px, 6vw, 48px);
+}
+
+/* ============================================================
+   SCENE 2 — FLOATING SCROLL INDICATOR
+   ============================================================ */
+
+.scroll-indicator {
+	position: fixed;
+	bottom: clamp(24px, 5vh, 40px);
+	left: 50%;
+	/* We use translateX(-50%) to center it, and animate the Y axis */
+	transform: translateX(-50%) translateY(0);
+	z-index: 20; /* Above the bottom fade */
+
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+
+	/* Frosted Glass aesthetic */
+	background: rgba(253, 250, 247, 0.75);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border: 1px solid rgba(198, 168, 124, 0.4);
+	box-shadow:
+		0 10px 20px -8px rgba(74, 63, 82, 0.25),
+		inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+	color: var(--gold-deep);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+
+	transition:
+		opacity 0.5s ease,
+		visibility 0.5s ease,
+		transform 0.4s var(--ease),
+		background 0.3s ease,
+		box-shadow 0.3s ease;
+
+	animation: bounceIndicator 2.5s infinite ease-in-out;
+}
+
+/* Hidden state */
+.scroll-indicator.is-hidden {
+	opacity: 0;
+	visibility: hidden;
+	transform: translateX(-50%) translateY(20px);
+	pointer-events: none;
+}
+
+.scroll-indicator:hover {
+	background: rgba(253, 250, 247, 0.95);
+	box-shadow:
+		0 14px 24px -8px rgba(176, 143, 99, 0.4),
+		inset 0 1px 0 rgba(255, 255, 255, 1);
+	/* Pause the bounce on hover so it's easier to click */
+	animation-play-state: paused;
+}
+
+@keyframes bounceIndicator {
+	0%,
+	20%,
+	50%,
+	80%,
+	100% {
+		transform: translateX(-50%) translateY(0);
+	}
+	40% {
+		transform: translateX(-50%) translateY(-6px);
+	}
+	60% {
+		transform: translateX(-50%) translateY(-3px);
+	}
+}
+
+/* ============================================================
+   AUDIO TOGGLE BUTTON
+   ============================================================ */
+.audio-toggle {
+	position: fixed;
+	top: clamp(16px, 4vh, 24px);
+	right: clamp(16px, 4vw, 24px);
+	z-index: 50;
+
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+
+	/* Frosted glass look */
+	background: rgba(253, 250, 247, 0.75);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border: 1px solid rgba(198, 168, 124, 0.4);
+	box-shadow: 0 8px 16px -6px rgba(74, 63, 82, 0.15);
+
+	color: var(--gold-deep);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+
+	transition: all 0.3s ease;
+}
+
+.audio-toggle:hover {
+	background: rgba(253, 250, 247, 1);
+	transform: scale(1.05);
+	box-shadow: 0 10px 20px -6px rgba(176, 143, 99, 0.3);
+}
+
+.audio-toggle .is-hidden {
+	display: none;
+}
